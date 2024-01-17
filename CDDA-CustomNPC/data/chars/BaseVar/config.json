@@ -1,0 +1,12 @@
+
+{
+    "virtual": true,
+    "base_var": {
+        "u_damage":30,
+        "u_critical_chance":5,
+        "u_critical_damage":0.5
+    },
+    "ench_status": {
+        "add_AVOID_FRIENDRY_FIRE": 1
+    }
+}

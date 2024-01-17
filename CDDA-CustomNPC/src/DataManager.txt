@@ -1,0 +1,603 @@
+import * as path from 'path';
+import * as  fs from 'fs';
+import { JArray, JObject, JToken, UtilFT, UtilFunc } from '@zwa73/utils';
+import { StaticDataMap } from './StaticData';
+import { AnimType, AnimTypeList, formatAnimName } from './AnimTool';
+import { genAmmuTypeID, genAmmoID, genArmorID, genEOCID, genEnchantmentID as genEnchantmentID, genFlagID, genGunID, genItemGroupID, genMutationID, genNpcClassID, genNpcInstanceID, genTalkTopicID } from './ModDefine';
+import { Eoc,MutationID,ItemGroupID,NpcClassID,NpcInstanceID,FlagID,AmmunitionTypeID,AmmoID, ArmorID, GunID, StatusSimple, EnchantmentID, Gun, Generic, GenericID, EnchArmorValType, EnchGenericValType, BoolObj, Spell, SoundEffect, SoundEffectVariantID, SoundEffectID, EocID, EocEffect, AnyCddaJsonList, Monster, ItemGroup, ItemGroupEntrieQuick, AnyCddaJson, AnyItemID } from 'CddaJsonFormat';
+import { CharSkill } from './CharSkill';
+import { SkillID } from './CddaJsonFormat/Skill';
+import { TalkTopicID } from './CddaJsonFormat/TalkTopic';
+
+
+
+/**角色事件列表 */
+export const CharEvemtTypeList = [
+    "CharIdle"              ,//角色 等待状态 刷新
+    "CharMove"              ,//角色 移动状态 刷新
+    "CharCauseHit"          ,//角色 命中目标 并成功造成伤害
+    "CharUpdate"            ,//角色 刷新
+    "CharSucessMeleeAttack"     ,//角色 近战攻击命中目标 并成功造成伤害
+    "CharCauseRangeHit"     ,//角色 远程攻击命中目标 并成功造成伤害
+    "CharInit"              ,//角色 被创建时
+    "CharTakeDamage"        ,//角色 受到任何伤害
+    "CharTakeRangeDamage"   ,//角色 受到远程伤害
+    "CharTakeMeleeDamage"   ,//角色 受到近战伤害
+    "CharBattleUpdate"      ,//角色 进入战斗时 刷新
+    "CharDeath"             ,//角色 死亡
+] as const;
+/**角色事件类型 */
+export type CharEventType = typeof CharEvemtTypeList[number];
+
+/**反转Talker的角色事件列表
+ * 对应同名CauseDamage
+ * npc为角色
+ */
+export const ReverseCharEvemtTypeList = [
+    "CharCauseDamage"       ,//u为受害者
+    "CharCauseMeleeDamage"  ,//u为受害者
+    "CharCauseRangeDamage"  ,//u为受害者
+] as const;
+/**反转Talker的角色事件类型
+ * 对应同名CauseDamage
+ */
+export type ReverseCharEventType = typeof ReverseCharEvemtTypeList[number];
+
+/**全局事件列表 */
+export const GlobalEvemtTypeList = ["AvatarUpdate",...CharEvemtTypeList,...ReverseCharEvemtTypeList] as const;
+/**全局事件 */
+export type GlobalEventType = typeof GlobalEvemtTypeList[number];
+
+
+/**事件效果 */
+export type EventEffect = {
+    /**eoc效果 */
+    effect:EocEffect;
+    /**排序权重 */
+    weight:number;
+}
+
+/**变量属性 */
+export type EnchStat = EnchGenericValType|EnchArmorValType;
+
+/**动态读取的角色设定 */
+export type CharConfig = {
+    /**基础属性 */
+    base_status:Record<StatusSimple,number>;
+    /**基础技能 */
+    base_skill?:Partial<Record<SkillID|"ALL",number>>;
+    /**附魔属性 */
+    ench_status?:Partial<Record<EnchStat,number>>;
+    /**固定的武器 */
+    weapon:Gun|Generic;
+    /**技能 */
+    skill?:CharSkill[];
+    /**强化项 */
+    upgrade?:CharUpgrade[];
+}
+
+/**角色强化项 */
+export type CharUpgrade = {
+    /**强化项ID
+     * 作为全局变量`${charName}_${fieled}`
+     */
+    field:string;
+    /**最大强化等级 未设置则为require_resource长度
+     * 若 require_resource 设置的长度不足以达到最大等级
+     * 则以最后一组材料填充剩余部分
+     */
+    max_lvl?:number;
+    /**所需要消耗的资源
+     * [[[一级的物品ID,数量],[一级的另一个物品ID,数量]]
+     * [[二级的物品ID,数量],[二级的另一个物品ID,数量]]]
+     */
+    require_resource:([AnyItemID,number]|AnyItemID)[][];
+    /**每个强化等级提升的附魔属性 */
+    lvl_ench_status?:Partial<Record<EnchStat,number>>;
+    /**只要拥有此字段就会添加的附魔属性 */
+    ench_status?:Partial<Record<EnchStat,number>>;
+    /**到达特定强化等级时将会获得的变异
+     * [拥有字段时获得的变异ID,[变异ID,强化等级],[第二个变异ID,强化等级]]
+     */
+    mutation?:([MutationID,number]|MutationID)[];
+}
+
+
+/**角色基础数据 */
+export type CharDefineData=Readonly<{
+    /**角色名 */
+    charName    : string;
+    /**基础变异ID 角色必定会拥有此变异 可以作为角色判断依据 */
+    baseMutID   : MutationID;
+    /**职业ID */
+    classID     : NpcClassID;
+    /**实例ID */
+    instanceID  : NpcInstanceID;
+    /**动画数据 */
+    animData    : Record<AnimType,AnimData>;
+    /**有效的动作动画 */
+    vaildAnim: AnimType[];
+    /**基础装备ID */
+    baseArmorID : ArmorID;
+    /**基础装备附魔ID */
+    baseEnchID : EnchantmentID;
+    /**基础武器ID */
+    baseWeaponID: GunID|GenericID;
+    /**基础武器物品组ID */
+    baseWeaponGroupID: ItemGroupID;
+    /**基础武器Flag ID */
+    baseWeaponFlagID: FlagID;
+    /**经验变量ID */
+    expVarID      :string;
+    /**主对话ID */
+    talkTopicID     :TalkTopicID;
+}>;
+
+/**主资源表 */
+export type DataTable={
+    /**输出的角色数据表 */
+    charTable:Record<string,{
+        /**角色基础定义数据 */
+        defineData:CharDefineData;
+        /**输出数据 */
+        outData:Record<string,JArray>;
+        /**输出的角色Eoc事件 u为角色 npc为未定义
+         * id为 `${charName}_${etype}`
+         */
+        charEventEocs:Record<CharEventType,EventEffect[]>;
+        /**输出的对象反转的角色Eoc事件 u为目标 npc为角色
+         * id为 `${charName}_${etype}`
+         */
+        reverseCharEventEocs:Record<ReverseCharEventType,EventEffect[]>;
+        /**角色设定 */
+        charConfig:CharConfig;
+    }>;
+    /**输出的静态数据表 */
+    staticTable:Record<string,JArray>;
+    /**输出的Eoc事件 */
+    eventEocs:Record<GlobalEventType,EventEffect[]>;
+}
+
+/**build配置 */
+export type BuildSetting={
+    /**游戏目录 */
+    game_path:string;
+    /**游戏贴图包目录名 */
+    target_gfxpack:string;
+    /**游戏音效包目录名 */
+    target_soundpack:string;
+}
+
+/**游戏数据 */
+export type GameData={
+    /**贴图包ID */
+    gfx_name?:string;
+    /**JSON */
+    game_json?:CddaJson;
+}
+
+export class DataManager{
+    /**资源目录 */
+    dataPath = path.join(process.cwd(),'data');
+    /**输出目录 */
+    outPath:string;// = path.join(process.cwd(),'CustomNPC');
+    /**角色目录 */
+    charPath:string;
+    /**角色列表 */
+    charList:string[];
+    /**build设置 */
+    buildSetting:BuildSetting = null as any;
+    /**游戏数据 */
+    gameData:GameData = {};
+    /**主资源表 */
+    private dataTable:DataTable={
+        charTable:{},
+        staticTable:{},
+        eventEocs:GlobalEvemtTypeList.reduce((acc,etype)=>
+            ({...acc,[etype]:[]}),{} as Record<GlobalEventType,EventEffect[]>)
+    }
+    /**
+     * @param dataPath 输入数据路径
+     * @param outPath  输出数据路径
+     */
+    private constructor(dataPath?:string,outPath?:string){
+        //合并静态数据
+        this.dataTable.staticTable = Object.assign({},
+            this.dataTable.staticTable,StaticDataMap);
+
+        //初始化资源io路径
+        this.outPath  = outPath as any;
+        this.dataPath = dataPath||this.dataPath;
+
+        this.charPath = path.join(this.dataPath,'chars');
+
+        this.charList = fs.readdirSync(this.charPath).filter(fileName=>{
+            const filePath = this.getCharPath(fileName);
+            if(fs.statSync(filePath).isDirectory())
+                return true;
+        });
+    }
+    /**静态构造函数
+     * @param dataPath 输入数据路径
+     * @param outPath  输出数据路径
+     */
+    static async create(dataPath?:string,outPath?:string):Promise<DataManager>{
+        let dm = new DataManager(dataPath,outPath);
+        //读取build设置
+        dm.buildSetting = (await UtilFT.loadJSONFile(path.join(dm.dataPath,'build_setting')))as BuildSetting;
+        const bs = dm.buildSetting;
+        dm.outPath = dm.outPath || path.join(bs.game_path,'data','mods','CustomNPC');
+
+        await dm.processGfxpack();
+        await dm.processSoundpack();
+        //await dm.processJson();
+        return dm;
+    }
+
+    /**初始化 处理贴图包 */
+    async processGfxpack(){
+        const bs = this.buildSetting;
+        const dm = this;
+        //处理贴图包
+        const gfxPath = path.join(bs.game_path,'gfx',bs.target_gfxpack);
+        const gfxTilesetTxtPath = path.join(gfxPath,'tileset.txt');
+        if(!(await UtilFT.pathExists(gfxTilesetTxtPath)))
+            throw "未找到目标贴图包自述文件 path:"+gfxTilesetTxtPath;
+        const match = (await fs.promises.readFile(gfxTilesetTxtPath,"utf-8"))
+                        .match(/NAME: (.*?)$/m);
+        if(match==null) throw "未找到目标贴图包NAME path:"+gfxTilesetTxtPath;
+        //写入贴图名
+        dm.gameData.gfx_name=match[1];
+        //读取贴图包设置备份 无则创建
+        let tileConfig:Record<string,any>;
+        if((await UtilFT.pathExists(path.join(gfxPath,'tile_config_backup.json'))))
+            tileConfig = await UtilFT.loadJSONFile(path.join(gfxPath,'tile_config_backup'));
+        else{
+            tileConfig = await UtilFT.loadJSONFile(path.join(gfxPath,'tile_config'));
+            await UtilFT.writeJSONFile(path.join(gfxPath,'tile_config_backup'),tileConfig);
+        }
+        //寻找npc素体 并将ID改为变异素体
+        let findMale = false;
+        let findFemale = false;
+        const fileObjList = tileConfig["tiles-new"] as any[];
+        for(const fileObj of fileObjList){
+            const tilesList = (fileObj.tiles as any[])
+            for(const tilesObj of tilesList){
+                if(tilesObj.id=="npc_female"){
+                    tilesObj.id = `overlay_female_mutation_${genMutationID("BaseBody")}`
+                    findFemale=true;
+                }else if (tilesObj.id=="npc_male"){
+                    tilesObj.id = `overlay_male_mutation_${genMutationID("BaseBody")}`
+                    findMale=true;
+                }
+                if(findMale&&findFemale) break;
+            }
+            if(findMale&&findFemale) break;
+        }
+        if(!(findMale&&findFemale)) console.log("未找到贴图包素体");
+        await UtilFT.writeJSONFile(path.join(gfxPath,'tile_config'),tileConfig);
+
+
+        //写入基础贴图配置
+        dm.saveToFile("mod_tileset.json", [{
+			type: "mod_tileset",
+			compatibility: [dm.gameData.gfx_name],
+			"tiles-new": [{
+                file: "32xTransparent.png",
+                sprite_width: 32,
+                sprite_height: 32,
+                sprite_offset_x: 0,
+                sprite_offset_y: 0,
+                pixelscale: 0,
+                tiles: [
+                    { id: "npc_female"  , fg: 0, bg: 0 },
+                    { id: "npc_male"    , fg: 0, bg: 0 },
+                    { id: "CNPC_GENERIC_TransparentItem", fg: 0, bg: 0 },
+                ]
+            }],
+		}]);
+    }
+
+    /**初始化 处理音效包 */
+    async processSoundpack(){
+        const bs = this.buildSetting;
+        const dm = this;
+        //删除旧的音效资源
+        const soundPath = path.join(bs.game_path,'data','sound',bs.target_soundpack,'cnpc');
+        await fs.promises.rm(soundPath, { recursive: true, force: true });
+
+        //遍历角色
+        for(const charName of dm.charList){
+            //确认角色输出文件夹
+            const charOutAudioFolder = path.join(soundPath,charName);
+            await UtilFT.ensurePathExists(charOutAudioFolder,true);
+
+            //遍历并找出所有音效文件夹
+            const charAudioFolderPath = path.join(dm.getCharPath(charName),'audio');
+            const charAudioList = (await fs.promises.readdir(charAudioFolderPath))
+                .filter(fileName=> fs.statSync(path.join(charAudioFolderPath,fileName)).isDirectory());
+
+            //复制音效文件夹到输出
+            for(const audioFolderName of charAudioList){
+                const charAudioPath = path.join(charAudioFolderPath,audioFolderName);
+                const outAudioPath = path.join(charOutAudioFolder,audioFolderName);
+                await fs.promises.cp(charAudioPath,outAudioPath,{recursive:true});
+                //找到所有子音效
+                const subAudio = (await fs.promises.readdir(charAudioPath))
+                    .filter(fileName=> [".ogg",".wav"].includes(path.parse(fileName).ext));
+
+                //创建音效配置 音效id为角色名 变体id为文件夹名 内容为子文件
+                const se:SoundEffect={
+                        type: "sound_effect",
+                        id: charName as SoundEffectID,
+                        variant: audioFolderName as SoundEffectVariantID,
+                        volume: 100,
+                        files: [ ...subAudio.map( fileName =>
+                                path.join('cnpc',charName,audioFolderName,fileName)) ]
+                }
+                //根据预留武器音效字段更改ID
+                const defineList = [
+                    "fire_gun"          ,//枪械射击
+                    "fire_gun_distant"  ,//枪械射击 远距
+                    "reload"            ,//枪械装弹
+                    "melee_hit_flesh"   ,//近战攻击肉质
+                    "melee_hit_metal"   ,//近战攻击金属质
+                    "melee_hit"         ,//近战攻击
+                ] as const;
+                if(defineList.includes(audioFolderName as any)){
+                    se.id = audioFolderName as SoundEffectID;
+                    se.variant = (await dm.getCharData(charName)).defineData.baseWeaponID as SoundEffectVariantID;
+                }
+                await UtilFT.writeJSONFile(path.join(charOutAudioFolder,audioFolderName),[se]);
+            }
+        }
+    }
+
+    /**载入所有json */
+    async processJson(){
+        const bs = this.buildSetting;
+        const dm = this;
+
+        const cddajson = await CddaJson.create(bs.game_path);
+        dm.gameData.game_json = cddajson;
+    }
+
+    /**获取角色表 如无则初始化 */
+    async getCharData(charName:string){
+        //初始化基础数据
+        if(this.dataTable.charTable[charName] == null){
+            const animData = AnimTypeList.map(animType=>({
+                animType:animType,
+                animName:formatAnimName(charName,animType),
+                mutID:genMutationID(formatAnimName(charName,animType)),
+                armorID:genArmorID(formatAnimName(charName,animType)),
+                itemGroupID:genItemGroupID(formatAnimName(charName,animType)),
+            })).reduce((acc, curr) => {
+                acc[curr.animType] = curr;
+                return acc;
+            }, {} as Record<AnimType,AnimData>);
+
+            const charConfig:CharConfig = await UtilFT.loadJSONFile(path.join(this.getCharPath(charName),'config')) as any;
+            console.log(charConfig);
+            const defineData:CharDefineData = {
+                charName            : charName,
+                baseMutID           : genMutationID(charName),
+                classID             : genNpcClassID(charName),
+                instanceID          : genNpcInstanceID(charName),
+                animData            : animData,
+                vaildAnim           : [],
+                baseArmorID         : genArmorID(charName),
+                baseEnchID          : genEnchantmentID(charName),
+                baseWeaponID        : charConfig.weapon.id,
+                baseWeaponGroupID   : genItemGroupID(`${charName}_WeaponGroup`),
+                baseWeaponFlagID    : genFlagID(`${charName}_WeaponFlag`),
+                expVarID          : `${charName}_exp`,
+                talkTopicID         : genTalkTopicID(charName),
+            }
+
+            //角色事件eoc主体
+            const charEventEocs = CharEvemtTypeList.reduce((acc,etype)=>(
+                {...acc,[etype]:[]}),{} as Record<CharEventType,EventEffect[]>)
+
+            //角色反转事件eoc主体
+            const reverseCharEventEocs = ReverseCharEvemtTypeList.reduce((acc,etype)=>(
+                {...acc,[etype]:[]}),{} as Record<ReverseCharEventType,EventEffect[]>)
+
+            this.dataTable.charTable[charName] = {
+                defineData,
+                charEventEocs,
+                reverseCharEventEocs,
+                charConfig,
+                outData:{},
+            }
+        }
+        return this.dataTable.charTable[charName];
+    }
+    /**添加 eoc的ID引用到 全局事件
+     * u为主角 npc为未定义
+     */
+    addEvent(etype:GlobalEventType,weight:number,...events:Eoc[]){
+        this.dataTable.eventEocs[etype].push(
+            ...events.map(eoc=>({effect:{"run_eocs":eoc.id},weight}))
+        );
+    }
+    /**添加 eoc的ID引用到 角色事件
+     * u为角色 npc为未定义
+     */
+    addCharEvent(charName:string,etype:CharEventType,weight:number,...events:Eoc[]){
+        this.dataTable.charTable[charName].charEventEocs[etype].push(
+            ...events.map(eoc=>({effect:{"run_eocs":eoc.id},weight}))
+        );
+    }
+    /**添加 eoc的ID引用到 反转角色事件
+     * u为目标 npc为角色
+     */
+    addReverseCharEvent(charName:string,etype:ReverseCharEventType,weight:number,...events:Eoc[]){
+        this.dataTable.charTable[charName].reverseCharEventEocs[etype].push(
+            ...events.map(eoc=>({effect:{"run_eocs":eoc.id},weight}))
+        );
+    }
+
+    /**获取 角色目录 */
+    getCharPath(charName:string){
+        return path.join(this.charPath,charName);
+    }
+    /**获取 角色图片目录 */
+    getCharImagePath(charName:string){
+        return path.join(this.getCharPath(charName),'image');
+    }
+
+    /**获取 输出角色目录 */
+    getOutCharPath(charName:string){
+        return path.join(this.outPath,'chars',charName);
+    }
+    /**输出数据到角色目录 */
+    async saveToCharFile(charName:string,filePath:string,obj:JToken) {
+        return UtilFT.writeJSONFile(path.join(this.getOutCharPath(charName),filePath),obj);
+    }
+    /**输出数据到主目录 */
+    async saveToFile(filePath:string,obj:JToken){
+        return UtilFT.writeJSONFile(path.join(this.outPath,filePath),obj);
+    }
+
+    /**输出数据 */
+    async saveAllData(){
+        //复制静态数据
+        const staticDataPath = path.join(this.dataPath,"StaticData");
+        UtilFT.ensurePathExists(staticDataPath,true);
+        //await
+        fs.promises.cp(staticDataPath,this.outPath,{ recursive: true });
+
+        //导出js静态数据
+        const staticData = this.dataTable.staticTable;
+        for(let key in staticData){
+            let obj = staticData[key];
+            //await
+            this.saveToFile(key,obj);
+        }
+
+
+        //导出角色数据
+        for(let charName in this.dataTable.charTable){
+            const charData = this.dataTable.charTable[charName];
+            const charOutData = charData.outData;
+            for(let key in charOutData){
+                let obj = charOutData[key];
+                //await
+                this.saveToCharFile(charName,key,obj);
+            }
+            //导出角色EOC
+            const charEventMap = Object.assign({},charData.charEventEocs,charData.reverseCharEventEocs);
+            const charEventEocs:Eoc[]=[];
+            for(const etypeStr in charEventMap){
+                const etype = etypeStr as (CharEventType|ReverseCharEventType);
+                //降序排序事件
+                const charEvent = charEventMap[etype].sort((a,b)=>b.weight-a.weight);
+                //至少有一个角色事件才会创建
+                if(charEvent.length>0){
+                    //创建角色触发Eoc
+                    const eventEoc:Eoc = {
+                        type:"effect_on_condition",
+                        eoc_type:"ACTIVATION",
+                        id:genEOCID(`${charName}_${etype}`),
+                        effect:[...charEvent.map(event=>event.effect)],
+                        condition:CharEvemtTypeList.includes(etype as CharEventType)
+                            ? {u_has_trait:charData.defineData.baseMutID}
+                            : {npc_has_trait:charData.defineData.baseMutID}
+                    }
+                    charEventEocs.push(eventEoc);
+                    //将角色触发eoc注册入全局eoc
+                    this.addEvent(etype,0,eventEoc);
+                }
+            }
+            this.saveToCharFile(charName,'char_event_eocs',charEventEocs);
+
+            //复制角色静态数据
+            const charStaticDataPath = path.join(this.getCharPath(charName),"StaticData");
+            await UtilFT.ensurePathExists(charStaticDataPath,true);
+            //await
+            fs.promises.cp(charStaticDataPath,this.getOutCharPath(charName),{ recursive: true });
+        }
+
+        //导出全局EOC
+        const globalEvent = this.dataTable.eventEocs;
+        const eventEocs:Eoc[]=[];
+        for(const etype in globalEvent){
+            //降序排序事件
+            const globalEvents = globalEvent[etype as GlobalEventType].sort((a,b)=>b.weight-a.weight);
+            //创建全局触发Eoc
+            const globalEoc:Eoc={
+                type:"effect_on_condition",
+                eoc_type:"ACTIVATION",
+                id:genEOCID(etype),
+                effect:[...globalEvents.map(event=>event.effect)],
+            }
+            eventEocs.push(globalEoc);
+        }
+        this.saveToFile('event_eocs',eventEocs);
+
+
+        //编译所有eocscript
+        const {stdout,stderr} = await UtilFunc.exec(`\"./tools/EocScript\" --input ${this.outPath} --output ${this.outPath}`)
+        console.log(stdout);
+    }
+}
+
+/**所有json的表 */
+export class CddaJson{
+    private readonly _table:Record<string,AnyCddaJson>;
+    private readonly _jsonList:ReadonlyArray<AnyCddaJson>;
+    private constructor(table:Record<string,AnyCddaJson>,jsonList:AnyCddaJson[]){
+        this._table = table;
+        this._jsonList = jsonList;
+    }
+    static async create(game_path:string):Promise<CddaJson>{
+        //主表
+        const table:Record<string,AnyCddaJson>={};
+
+        //加载所有json
+        const plist:Promise<JToken>[] = [];
+        const jsonFilePathList = Object.values(UtilFT.fileSearch(game_path,/\.json$/.source));
+        jsonFilePathList.filter(filePath => !filePath.includes("CNPC") )
+            .forEach(filePath => plist.push(UtilFT.loadJSONFile(filePath)) );
+        const rawJsonList = await Promise.all(plist);
+        //筛选有效json
+        function processJson(json:any){
+            if(typeof json == "object" &&
+                "type" in json &&
+                "id" in json &&
+                typeof json.id == "string")
+                table[`${json.type}_${json.id}`] = json;
+        }
+        rawJsonList.forEach(item=>{
+            if(Array.isArray(item))
+                item.forEach(subitem=>processJson(subitem));
+            else processJson(item);
+        });
+
+        const cddajson = new CddaJson(table,Object.values(table));
+        return cddajson;
+    }
+    getJson(type:string,id:string):AnyCddaJson|undefined{
+        return  this._table[`${type}_${id}`];
+    }
+    jsonList(){
+        return this._jsonList;
+    }
+}
+
+
+/**动画数据 */
+export type AnimData = Readonly<{
+    /**动画类型 */
+    animType:AnimType;
+    /**动画名 */
+    animName:string;
+    /**动画变异ID */
+    mutID:MutationID;
+    /**动画装备ID */
+    armorID:ArmorID;
+    /**动画装备物品组ID */
+    itemGroupID:ItemGroupID;
+}>;
+

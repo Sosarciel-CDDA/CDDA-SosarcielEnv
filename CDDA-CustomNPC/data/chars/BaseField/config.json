@@ -1,0 +1,115 @@
+{
+    "virtual": true,
+    "upgrade": [
+        {
+            "field": "力量",
+            "max_lvl": 10,
+            "require_resource": [
+                [["iv_mutagen_ursine"],["iv_mutagen_beast"]]
+            ],
+            "lvl_ench_status": {
+                "add_STRENGTH":1
+            },
+            "desc": "每级提高 1 点 力量"
+        },
+        {
+            "field": "智力",
+            "max_lvl": 10,
+            "require_resource": [
+                [["iv_mutagen_cephalopod"]]
+            ],
+            "lvl_ench_status": {
+                "add_INTELLIGENCE":1
+            },
+            "desc": "每级提高 1 点 智力"
+        },
+        {
+            "field": "感知",
+            "max_lvl": 10,
+            "require_resource": [
+                [["iv_mutagen_bird"]]
+            ],
+            "lvl_ench_status": {
+                "add_PERCEPTION":1
+            },
+            "desc": "每级提高 1 点 感知"
+        },
+        {
+            "field": "敏捷",
+            "max_lvl": 10,
+            "require_resource": [
+                [["iv_mutagen_fish"],["iv_mutagen_cephalopod"]]
+            ],
+            "lvl_ench_status": {
+                "add_PERCEPTION":1
+            },
+            "desc": "每级提高 1 点 敏捷"
+        },
+        {
+            "field": "魔力",
+            "max_lvl": 10,
+            "require_resource": [
+                [["manatouched_serum"]]
+            ],
+            "lvl_ench_status": {
+                "add_MAX_MANA": 300,
+                "multiply_MAX_MANA": 0.2,
+                "multiply_REGEN_MANA": 0.1
+            },
+            "desc": "每级提高 300 点 法力上限, 20% 法力上限倍率, 10% 法力回复速度"
+        },
+        {
+            "field": "自愈",
+            "max_lvl": 10,
+            "require_resource": [
+                [["iv_mutagen_slime"],["iv_mutagen_troglobite"],["iv_mutagen_chimera"]]
+            ],
+            "lvl_ench_status": {
+                "multiply_REGEN_HP":0.2
+            },
+            "desc": "每级提高 20% 生命回复速度"
+        },
+        {
+            "field": "生命",
+            "max_lvl": 10,
+            "require_resource": [
+                [["iv_mutagen_ursine"],["iv_mutagen_cattle"],["iv_mutagen_chimera"]]
+            ],
+            "lvl_ench_status": {
+                "multiply_MAX_HP":0.1
+            },
+            "desc": "每级提高 10% 最大生命"
+        },
+        {
+            "field": "耐力",
+            "max_lvl": 10,
+            "require_resource": [
+                [["iv_mutagen_lupine"],["iv_mutagen_mouse"],["iv_mutagen_rabbit"]]
+            ],
+            "lvl_ench_status": {
+                "multiply_REGEN_STAMINA":0.02,
+                "multiply_MAX_STAMINA":0.06
+            },
+            "desc": "每级提高 6% 最大耐力, 2% 耐力回复速度"
+        },
+        {
+            "field": "防御",
+            "max_lvl": 10,
+            "require_resource": [
+                [["iv_mutagen_crustacean"],["iv_mutagen_spider"],["iv_mutagen_snail"]]
+            ],
+            "lvl_ench_status": {
+                "add_ARMOR_ACID"    :-1.5,
+                "add_ARMOR_BASH"    :-1.5,
+                "add_ARMOR_BIO"     :-1.5,
+                "add_ARMOR_BULLET"  :-1.5,
+                "add_ARMOR_COLD"    :-1.5,
+                "add_ARMOR_CUT"     :-1.5,
+                "add_ARMOR_ELEC"    :-1.5,
+                "add_ARMOR_HEAT"    :-1.5,
+                "add_ARMOR_STAB"    :-1.5
+            },
+            "desc": "每级提高 1.5 全伤害减免"
+        }
+    ]
+}

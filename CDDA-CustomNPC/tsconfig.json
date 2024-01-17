@@ -1,0 +1,23 @@
+{
+    "compilerOptions": {
+        "allowJs": true,
+        "strict": true,
+		"experimentalDecorators": true,
+        "target": "ES2022",
+        "module": "commonjs",
+        "outDir": "./dist",
+        "rootDir": "./src",
+        "declaration": true,
+        "baseUrl": ".",
+        "paths": {
+            "CnpcEvent"         : ["./src/CnpcEvent"],
+            "CharBuild"         : ["./src/CharBuild"],
+            "StaticData"        : ["./src/StaticData"],
+            "ModDefine"         : ["./src/ModDefine"],
+			"@src/*"            : ["./src/*"],
+			"@/*"               : ["./*"]
+        }
+    },
+    "include": ["./src/**/*.ts", "./src/**/*.js"],
+    "exclude": ["./node_modules/**/*"]
+}

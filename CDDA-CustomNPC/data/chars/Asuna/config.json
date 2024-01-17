@@ -1,0 +1,304 @@
+{
+	"extends": ["BaseField","BaseSkill","BaseVar","AnimStatModify"],
+    "base_status":{
+        "str":12,
+        "dex":12,
+        "per":14,
+        "int":10
+    },
+	"base_skill": {
+		"ALL": 2,
+		"pistol": 4,
+		"gun": 4,
+		"melee": 4,
+		"stabbing": 4
+	},
+    "weapon":[
+		{
+			"item":{
+				"type": "GUN",
+				"copy-from": "m9",
+				"id": "AsunaM9",
+				"name": {"str_sp": "Asuna的 伯莱塔 M9A1 手枪"},
+				"description": "Asuna的 伯莱塔 M9A1 手枪",
+				"ammo": ["Asuna9mm"],
+				"pocket_data": [{
+					"pocket_type": "MAGAZINE_WELL",
+					"item_restriction": ["AsunaMag"]
+				}],
+				"flags": ["NO_UNLOAD","ALLOWS_BODY_BLOCK","SHOTINT_70"],
+				"min_cycle_recoil": 0,
+				"valid_mod_locations": [],
+				"faults": [],
+				"modes": [
+					["DEFAULT"	,"auto", 10]
+				],
+				"range": 16,
+				"ammo_to_fire": 0
+			}
+		},
+		{
+			"item":{
+				"type": "TOOL",
+				"copy-from": "knife_rm42",
+				"id": "AsunaKnife",
+				"name":{"str_sp": "Asuna的 战术匕首"},
+				"description": "Asuna的 战术匕首",
+				"to_hit":{
+					"grip": "weapon",
+					"length": "short",
+					"surface": "line",
+					"balance": "good"
+				},
+				"flags": [ "DIAMOND","ALLOWS_BODY_BLOCK" ]
+			}
+		}
+	],
+	"carry": [
+		{
+			"item":{
+				"id":"AsunaMag",
+				"type": "MAGAZINE",
+				"copy-from":"m9mag_18rd",
+				"pocket_data": [{
+					"pocket_type": "MAGAZINE",
+					"rigid": true,
+					"ammo_restriction": {
+						"Asuna9mm": 18
+					}
+				}],
+				"ammo_type": ["Asuna9mm"],
+				"name": {"str_sp": "Asuna的 M9 18发弹匣"},
+				"description": "Asuna的 M9 18发弹匣",
+				"flags": ["MAG_DESTROY","NO_UNLOAD"],
+				"count": 18
+			},
+			"recharge": 1,
+			"count": 10
+		}
+	],
+	"skill": [
+		{
+			"name": "蒸发未来",
+			"cast_condition":{"hook": "TryRangeAttack"},
+			"audio":[
+				{"id":"EvaporateFuture","cooldown": 180},
+				"EvaporateFutureSF","BaseAudio:BashHit"
+			],
+			"spell": {
+				"id":"EvaporateFuture",
+				"type": "SPELL",
+				"name": "蒸发未来",
+				"description": "对一条线上的敌人造成 2.1*感知系数 的伤害, 使用后随机降低本技能冷却时间。",
+				"min_damage":{"math": ["PerDamage(u_damage)*2.1"]},
+				"max_damage":999999,
+				"damage_type": "bullet",
+				"min_range":{"math": ["BATTLE_RANGE"]},
+				"min_aoe":1,
+				"shape": "cone",
+				"base_casting_time":100,
+				"valid_targets": ["hostile","ground"],
+				"effect": "attack",
+				"flags": ["NO_FAIL","NO_HANDS","NO_LEGS"]
+			},
+			"after_effect":[
+				{"math": ["u_EvaporateFuture_cooldown","=","rng(0, 1)*u_EvaporateFuture_cooldown"]}
+			],
+			"cooldown":64,
+			"weight": 1,
+			"require_weapon_flag": ["AsunaM9"]
+		},
+		{
+			"name": "精准狙击",
+			"cast_condition":{
+				"hook": "BattleUpdate",
+				"condition":{"not":{"u_has_effect":"PreciseSnipe"}}
+			},
+			"audio":["PreciseSnipe","PreciseSnipeSF"],
+			"spell": {
+				"type": "SPELL",
+				"id":"PreciseSnipe",
+				"name": "精准狙击",
+				"description": "为自身添加 120 秒 精准狙击 效果。",
+				"effect": "attack",
+				"valid_targets": ["self"],
+				"effect_str": "PreciseSnipe",
+				"shape": "blast",
+				"base_casting_time":100,
+				"min_duration": 12000,
+				"flags": ["NO_FAIL","NO_HANDS","NO_LEGS"]
+			},
+			"cooldown":16,
+			"weight": 2,
+			"require_weapon_flag": ["AsunaM9"]
+		},
+		{
+			"name": "作战指挥",
+			"cast_condition":{
+				"hook": "BattleUpdate",
+				"condition":{"not":{"u_has_effect":"CombatCommand"}}
+			},
+			"spell": {
+				"type": "SPELL",
+				"id":"CombatCommand",
+				"name": "作战指挥",
+				"description": "为自身添加 120 秒 作战指挥 效果。",
+				"effect": "attack",
+				"valid_targets": ["self"],
+				"effect_str": "CombatCommand",
+				"shape": "blast",
+				"min_duration": 12000,
+				"flags": ["NO_FAIL","NO_HANDS","NO_LEGS"]
+			},
+			"common_cooldown": 0,
+			"weight": 10
+		},
+		{
+			"name": "刀锋打击",
+			"cast_condition":{"hook": "TryMeleeAttack"},
+			"cooldown":64,
+			"audio":[
+				{"id":"BladeStrike_","cooldown": 180},
+				"BladeStrikeSF","BaseAudio:BashHit"
+			],
+			"spell": {
+				"id":"BladeStrike",
+				"type": "SPELL",
+				"name": "刀锋打击",
+				"description": "对目标造成 3.6*力量系数 的伤害, 为其添加 60 秒 重创 效果, 并造成 40 撕裂伤害。",
+				"min_damage":{
+					"math": ["StrDamage(u_damage)*3.6"]
+				},
+				"max_damage":999999,
+				"damage_type": "cut",
+				"shape": "blast",
+				"base_casting_time":100,
+				"min_range": {"math": ["MELEE_RANGE"]},
+				"valid_targets": ["hostile"],
+				"effect": "attack",
+				"effect_str": "HeavyTrauma",
+				"min_duration": 6000,
+				"flags": ["NO_FAIL","NO_HANDS","NO_LEGS"]
+			},
+			"spec_effect": [{
+				"type": "ExtDamage",
+				"damage_type":"Laceration",
+				"amount": 40
+			}],
+			"weight": 1,
+			"require_weapon_flag": ["AsunaKnife"]
+		},
+		{
+			"name": "情报破译",
+			"cast_condition":{
+				"hook": "BattleUpdate",
+				"target": "filter_random",
+				"condition":{"not":{"npc_has_effect":"IntelligenceDeciphered"}}
+			},
+			"cooldown":24,
+			"audio":[
+				"IntelligenceDecipheredSF"
+			],
+			"spell": {
+				"id":"IntelligenceDeciphered",
+				"type": "SPELL",
+				"name": "情报破译",
+				"description": "为目标添加 60 秒 情报破译 效果。",
+				"shape": "blast",
+				"min_range": {"math": ["BATTLE_RANGE"]},
+				"valid_targets": ["hostile"],
+				"effect": "attack",
+				"effect_str": "IntelligenceDeciphered",
+				"min_duration":6000,
+				"base_casting_time":100,
+				"min_aoe": 2,
+				"flags": ["NO_FAIL","NO_HANDS","NO_LEGS"]
+			},
+			"weight": 2
+		},
+		{
+			"name": "创伤之刃",
+			"cast_condition":{
+				"hook": "TryMeleeAttack"
+			},
+			"audio":[
+				{"id":"BladeofTrauma","cooldown": 180},
+				"BladeofTraumaSF","BaseAudio:BashHit"
+			],
+			"spell": {
+				"id":"BladeofTrauma",
+				"type": "SPELL",
+				"name": "创伤之刃",
+				"description": "对目标造成 1.2*力量系数 的伤害, 并造成 敏捷系数*0.6 创伤伤害。",
+				"min_damage":{
+					"math": ["StrDamage(u_damage)*1.2"]
+				},
+				"max_damage":999999,
+				"damage_type": "cut",
+				"shape": "blast",
+				"base_casting_time":100,
+				"min_range": {"math": ["MELEE_RANGE"]},
+				"valid_targets": ["hostile"],
+				"effect": "attack",
+				"flags": ["NO_FAIL","NO_HANDS","NO_LEGS"]
+			},
+			"spec_effect": [{
+				"type": "ExtDamage",
+				"damage_type":"Trauma",
+				"amount": {"math": ["DexDamage(u_damage) * 0.6"]}
+			}],
+			"cooldown":16,
+			"weight": 2,
+			"require_weapon_flag": ["AsunaKnife"]
+		},
+		{
+			"name": "战场先锋",
+			"cast_condition":[{
+				"hook": "BattleUpdate",
+				"condition":{"not":{"u_has_effect":"BattlefieldVanguard"}}
+			},{
+				"hook": "SlowUpdate",
+				"condition":{"not":{"u_has_effect":"BattlefieldVanguard"}}
+			}],
+			"spell": {
+				"type": "SPELL",
+				"id":"BattlefieldVanguard",
+				"name": "战场先锋",
+				"description": "为自身添加 120 秒 战场先锋 效果。",
+				"effect": "attack",
+				"valid_targets": ["self"],
+				"effect_str": "BattlefieldVanguard",
+				"shape": "blast",
+				"min_duration": 12000,
+				"flags": ["NO_FAIL","NO_HANDS","NO_LEGS","NO_EXPLOSION_SFX","SILENT"]
+			},
+			"common_cooldown": 0,
+			"weight": 10
+		},
+		{
+			"name": "弱点重创",
+			"cast_condition":{"hook": "TryAttack"},
+			"spell": {
+				"type": "SPELL",
+				"id":"WeaknessHit",
+				"name": "弱点重创",
+				"description": "任何一次成功的攻击都会额外造成 敏捷系数*0.02(至少1) 的 创伤伤害。",
+				"effect": "attack",
+				"damage_type":"Trauma",
+				"min_damage":{"math": ["max(1, DexDamage(u_damage) * 0.02)"]},
+				"max_damage":999999,
+				"valid_targets": ["hostile"],
+				"shape": "blast",
+				"flags": ["NO_FAIL","NO_HANDS","NO_LEGS","NO_EXPLOSION_SFX","SILENT"]
+			},
+			"common_cooldown": 0,
+			"weight": 10
+		}
+	],
+	"base_mutation": [],
+	"desc": {
+		"age": 17,
+		"gender": "female",
+		"height": 158
+	}
+}
