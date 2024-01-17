@@ -1,0 +1,23 @@
+{
+    "json.schemas": [
+        {
+            "fileMatch": ["CDDA-CustomNPC/data/chars/*/config.json"],
+            "url": "./schema/CharConfig.schema.json"
+        },
+        {
+            "fileMatch": ["CDDA-CustomNPC/data/chars/*/image/*.json"],
+            "url": "./schema/ImageInfo.schema.json"
+        },
+        {
+            "fileMatch": ["CDDA-CustomNPC/data/chars/*/anime/info.json"],
+            "url": "./schema/AnimeInfo.schema.json"
+        },
+        {
+            "fileMatch": [
+                "CDDA-CustomNPC/data/chars/*/StaticData/**/*.json",
+                "CDDA-CustomNPC/data/StaticData/**/*.json"
+            ],
+            "url": "./CDDA-Schema/CddaSchema/AnyCddaJsonList.schema.json"
+        }
+    ]
+}
