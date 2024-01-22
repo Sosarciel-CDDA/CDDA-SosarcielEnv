@@ -7,12 +7,5 @@
     "tsc-alias": "^1.8.8",
     "typescript": "^5.3.3",
     "typescript-json-schema": "^0.62.0"
-  },
-  "scripts": {
-    "compile:CDDA-Event": "npm run compile --prefix CDDA-Event",
-    "compile:CDDA-Schema": "npm run compile --prefix CDDA-Schema",
-    "compile:CDDA-Enchantment": "npm run compile --prefix CDDA-Enchantment",
-    "compile:CDDA-CustomNPC": "npm run compile --prefix CDDA-CustomNPC",
-    "compile": "npm run compile:CDDA-Event && npm run compile:CDDA-Schema && npm run compile:CDDA-Enchantment && npm run compile:CDDA-CustomNPC"
   }
 }
