@@ -13,3 +13,6 @@
 [submodule "CDDA-SmartNPC"]
 	path = CDDA-SmartNPC
 	url = https://github.com/Sosarciel-CDDA/CDDA-SmartNPC.gitgithub.com/Sosarciel-CDDA/CDDA-SmartNPC.git
+[submodule "CDDA-CustomMedia"]
+	path = CDDA-CustomMedia
+	url = https://github.com/Sosarciel-CDDA/CDDA-CustomMedia.git
