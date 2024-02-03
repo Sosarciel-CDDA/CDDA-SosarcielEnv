@@ -24,6 +24,14 @@
                 "CDDA-SmartNPC/data/CastAI/**/*.json"
             ],
             "url": "./CDDA-SmartNPC/schema/CastAIDataTable.schema.json"
-        }
+        },
+        {
+            "fileMatch": ["CDDA-CustomMedia/data/Media/*/image/*.json"],
+            "url": "./CDDA-CustomMedia/schema/ImageInfo.schema.json"
+        },
+        {
+            "fileMatch": ["CDDA-CustomMedia/data/Media/*/anime/info.json"],
+            "url": "./CDDA-CustomMedia/schema/AnimeInfo.schema.json"
+        },
     ]
 }
