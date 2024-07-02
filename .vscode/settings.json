@@ -25,5 +25,8 @@
             "fileMatch": ["CDDA-CustomMedia/data/Media/*/anime/info.json"],
             "url": "./CDDA-CustomMedia/schema/AnimeInfo.schema.json"
         },
-    ]
+    ],
+    "js/ts.implicitProjectConfig.target": "ES2022",
+    "js/ts.implicitProjectConfig.module": "CommonJS",
+    "typescript.tsdk": "./node_modules/typescript/lib"
 }
