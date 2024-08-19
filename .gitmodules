@@ -16,3 +16,6 @@
 [submodule "CDDA-CustomMedia"]
 	path = CDDA-CustomMedia
 	url = https://github.com/Sosarciel-CDDA/CDDA-CustomMedia.git
+[submodule "CDDA-WorldEditor"]
+	path = CDDA-WorldEditor
+	url = https://github.com/Sosarciel-CDDA/CDDA-WorldEditor.git
