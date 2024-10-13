@@ -1,0 +1,136 @@
+import { DataManager } from "cdda-event";
+import { BoolObj, Eoc, EocEffect, EocID, Spell } from "cdda-schema";
+import { UNDef } from "./UNDefine";
+import { FULL_RECIVERY_EOCID, DESTORY_U_EOCID, UNIQUE_NPC_MUTID, CON_SPELL_FLAG } from "./BaseData";
+import {JObject} from '@zwa73/utils';
+
+
+
+
+
+
+/**出生点ID */
+export const SpawnLocID = "UniqueNpc_SpawnLoc";
+
+/**全局UniqueNPC的数量 */
+const UniqueNpcCountVarID = "UniqueNpcCount";
+
+/**根据编号获得全局UniqueNPC的charid存储变量 */
+const UniqueNpcID = (str:string)=>`UniqueNpcID_${str}`;
+
+/**生成遍历npc的eoc */
+export const eachCharEoc = (id:EocID,effectList:EocEffect[],cond?:BoolObj,forceId?:boolean)=>UNDef.genActEoc(id,[
+    {math:['eachIndex','=','0']},
+    {
+        run_eoc_until:{
+            id:'EachNpcUntilInline',
+            eoc_type:'ACTIVATION',
+            effect:[
+                //{u_message:"each <global_val:eachIndex>"},
+                {math:['eachIndex','+=','1']},
+                {set_string_var:UniqueNpcID(`<global_val:eachIndex>`),target_var:{context_val:'charidPtr'},parse_tags:true},
+                {run_eoc_with:{
+                    id:`${id}_runeocwithinline`,
+                    eoc_type:'ACTIVATION',
+                    effect:effectList
+                },
+                alpha_talker:{var_val:'charidPtr'}},
+            ]
+        },
+        //condition:{ math:['_eachIndex','<=',UniqueNpcCountVarID] },
+        iteration: {math:[UniqueNpcCountVarID]}
+    }
+],cond,forceId);
+
+
+
+
+//npc保护
+export async function buildNpcProtect(dm:DataManager){
+    const out:JObject[] = [];
+
+
+    //递归随机传送
+    const randTeleportEocID = UNDef.genEOCID('RandTeleport');
+    const randTeleport = UNDef.genActEoc(randTeleportEocID,[
+        {u_location_variable:{context_val:SpawnLocID}},
+        {
+            location_variable_adjust:{context_val:SpawnLocID},
+            x_adjust: [ -5, 5 ],
+            y_adjust: [ -5, 5 ]
+        } as any,
+        {
+            u_teleport:{context_val:SpawnLocID},
+            force:true,
+            false_eocs:[ {run_eocs:[randTeleportEocID]} ]
+        },
+    ],undefined,true);
+    out.push(randTeleport);
+
+    //传送到出生点
+    const teleportToSpawn = UNDef.genActEoc('TeleportToSpawn',[
+        
+        {u_teleport:{global_val:SpawnLocID},force:true},
+    ]);
+    out.push(teleportToSpawn);
+
+    /**alpha是有效的npc */
+    const UIsVaildNpc = 'u_isVaildUniqueNpc';
+    //死亡保护
+    const pdeath:Eoc=UNDef.genActEoc('DeathRebirth',[
+        {run_eocs:[teleportToSpawn.id,FULL_RECIVERY_EOCID]},
+    ],{or:[
+        {math:[UIsVaildNpc,'==','1']},
+        'u_is_avatar',
+    ]});
+    dm.addInvokeID('DeathPrev',-100,pdeath.id);
+    out.push(pdeath);
+
+
+    //出生点设置
+    const spawnLocSet:Eoc=UNDef.genActEoc('SpawnLocSet',[
+        {u_location_variable:{global_val:SpawnLocID}},
+    ]);
+    dm.addInvokeID('GameStart',0,spawnLocSet.id);
+    out.push(spawnLocSet);
+
+
+    //初始化Npc
+    const InitNpc:Eoc = UNDef.genActEoc('InitNpc',[
+        {set_string_var:'<u_name>',target_var:{context_val:'uname'},parse_tags:true},
+        {
+            if:{math:[`v_uname`,'>=','1']},
+            then:[{run_eocs:[DESTORY_U_EOCID]}],
+            else:[
+                {math:[UIsVaildNpc,'=','1']},
+                {math:[`v_uname`,'=','1']},
+                {math:[UniqueNpcCountVarID,'+=','1'] },
+                {set_string_var:UniqueNpcID(`<global_val:${UniqueNpcCountVarID}>`),target_var:{context_val:'charidPtr'},parse_tags:true},
+                {u_set_talker: { var_val: "charidPtr" } },
+            ],
+        }
+    ],{u_has_trait:UNIQUE_NPC_MUTID});
+    dm.addInvokeID('Init',0,InitNpc.id);
+    out.push(InitNpc);
+
+    //召集npc法术
+    const GatheringEoc:Eoc = eachCharEoc('Gathering',[
+        {run_eocs:[teleportToSpawn.id]},
+    ])
+    const GatheringSpell:Spell = {
+        id:UNDef.genSpellID('Gathering'),
+        name:"召集",
+        description:"召集所有npc回到出生点",
+        type:'SPELL',
+        effect:'effect_on_condition',
+        effect_str:GatheringEoc.id,
+        valid_targets:['self'],
+        shape:'blast',
+        //flags:[...CON_SPELL_FLAG],
+    }
+    out.push(GatheringEoc,GatheringSpell);
+
+
+
+    dm.addData(out,'protect');
+}

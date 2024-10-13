@@ -1,0 +1,21 @@
+{
+  "name": "cdda-uniquenpc",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "compile": "tsc && tsc-alias",
+    "build": "npm run compile && node --trace-warnings build"
+  },
+  "keywords": [
+    "cdda"
+  ],
+  "author": "zwa73",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@zwa73/utils": "^1.0.163",
+    "cdda-event": "file:../CDDA-Event",
+    "cdda-schema": "file:../CDDA-Schema"
+  }
+}

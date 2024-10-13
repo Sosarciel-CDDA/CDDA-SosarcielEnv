@@ -5,6 +5,7 @@
         "./CDDA-CustomMedia",
         "./CDDA-Enchantment",
         "./CDDA-SmartNPC",
-        "./CDDA-CustomNPC"
+        "./CDDA-CustomNPC",
+        "./CDDA-UniqueNPC"
     ]
 }
