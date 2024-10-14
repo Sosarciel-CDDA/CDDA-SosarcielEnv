@@ -37,16 +37,30 @@ exports.eachCharEoc = eachCharEoc;
 //npc保护
 async function buildNpcProtect(dm) {
     const out = [];
+    //递归随机传送
+    const randTeleportEocID = UNDefine_1.UNDef.genEOCID('RandTeleport');
+    const randTeleport = UNDefine_1.UNDef.genActEoc(randTeleportEocID, [
+        { u_location_variable: { context_val: 'tmploc' } },
+        { location_variable_adjust: { context_val: 'tmploc' },
+            x_adjust: { math: ['rand(2)-1'] },
+            y_adjust: { math: ['rand(2)-1'] }
+        },
+        { run_eoc_with: {
+                id: `RandTeleport_runeocwithinline`,
+                eoc_type: 'ACTIVATION',
+                effect: [{ if: 'u_is_character', then: [{ run_eocs: [randTeleportEocID] }] }],
+            }, alpha_loc: { context_val: 'tmploc' } },
+        { u_teleport: { context_val: 'tmploc' }, force: true },
+    ], undefined, true);
+    out.push(randTeleport);
     //传送到出生点
     const teleportToSpawn = UNDefine_1.UNDef.genActEoc('TeleportToSpawn', [
+        { run_eoc_with: {
+                id: `TeleportToSpawn_runeocwithinline`,
+                eoc_type: 'ACTIVATION',
+                effect: [{ if: 'u_is_character', then: [{ run_eocs: [randTeleport.id] }] }],
+            }, alpha_loc: { global_val: exports.SpawnLocID } },
         { u_teleport: { global_val: exports.SpawnLocID }, force: true },
-        { u_location_variable: { context_val: exports.SpawnLocID } },
-        {
-            location_variable_adjust: { context_val: exports.SpawnLocID },
-            "x_adjust": [-5, 5],
-            "y_adjust": [-5, 5]
-        },
-        { u_teleport: { context_val: exports.SpawnLocID }, force: true },
     ]);
     out.push(teleportToSpawn);
     /**alpha是有效的npc */
@@ -96,7 +110,7 @@ async function buildNpcProtect(dm) {
         effect_str: GatheringEoc.id,
         valid_targets: ['self'],
         shape: 'blast',
-        //flags:[...CON_SPELL_FLAG],
+        flags: [...BaseData_1.CON_SPELL_FLAG],
     };
     out.push(GatheringEoc, GatheringSpell);
     dm.addData(out, 'protect');

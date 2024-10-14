@@ -26,7 +26,7 @@ export const eachCharEoc = (id:EocID,effectList:EocEffect[],cond?:BoolObj,forceI
             id:'EachNpcUntilInline',
             eoc_type:'ACTIVATION',
             effect:[
-                //{u_message:"each <global_val:eachIndex>"},
+                {u_message:"each <global_val:eachIndex>"},
                 {math:['eachIndex','+=','1']},
                 {set_string_var:UniqueNpcID(`<global_val:eachIndex>`),target_var:{context_val:'charidPtr'},parse_tags:true},
                 {run_eoc_with:{
@@ -53,23 +53,27 @@ export async function buildNpcProtect(dm:DataManager){
     //递归随机传送
     const randTeleportEocID = UNDef.genEOCID('RandTeleport');
     const randTeleport = UNDef.genActEoc(randTeleportEocID,[
-        {u_location_variable:{context_val:SpawnLocID}},
-        {
-            location_variable_adjust:{context_val:SpawnLocID},
-            x_adjust: [ -5, 5 ],
-            y_adjust: [ -5, 5 ]
+        {u_location_variable:{context_val:'tmploc'}},
+        {location_variable_adjust:{context_val:'tmploc'},
+            x_adjust: {math:['rand(2)-1']},
+            y_adjust: {math:['rand(2)-1']}
         } as any,
-        {
-            u_teleport:{context_val:SpawnLocID},
-            force:true,
-            false_eocs:[ {run_eocs:[randTeleportEocID]} ]
-        },
+        {run_eoc_with:{
+            id:`RandTeleport_runeocwithinline`,
+            eoc_type:'ACTIVATION',
+            effect:[ {if:'u_is_character',then:[{run_eocs:[randTeleportEocID]}]} ],
+        }, alpha_loc:{context_val:'tmploc'} },
+        {u_teleport:{context_val:'tmploc'},force:true},
     ],undefined,true);
     out.push(randTeleport);
 
     //传送到出生点
     const teleportToSpawn = UNDef.genActEoc('TeleportToSpawn',[
-        
+        {run_eoc_with:{
+            id:`TeleportToSpawn_runeocwithinline`,
+            eoc_type:'ACTIVATION',
+            effect:[ {if:'u_is_character',then:[{run_eocs:[randTeleport.id]}]} ],
+        }, alpha_loc:{global_val:SpawnLocID} },
         {u_teleport:{global_val:SpawnLocID},force:true},
     ]);
     out.push(teleportToSpawn);
@@ -126,7 +130,7 @@ export async function buildNpcProtect(dm:DataManager){
         effect_str:GatheringEoc.id,
         valid_targets:['self'],
         shape:'blast',
-        //flags:[...CON_SPELL_FLAG],
+        flags:[...CON_SPELL_FLAG],
     }
     out.push(GatheringEoc,GatheringSpell);
 
