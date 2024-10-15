@@ -1,11 +1,10 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.eachCharEoc = exports.SpawnLocID = void 0;
+exports.eachCharEoc = void 0;
 exports.buildNpcProtect = buildNpcProtect;
 const UNDefine_1 = require("./UNDefine");
 const BaseData_1 = require("./BaseData");
-/**出生点ID */
-exports.SpawnLocID = "UniqueNpc_SpawnLoc";
+const Export_1 = require("./Export");
 /**全局UniqueNPC的数量 */
 const UniqueNpcCountVarID = "UniqueNpcCount";
 /**根据编号获得全局UniqueNPC的charid存储变量 */
@@ -59,8 +58,8 @@ async function buildNpcProtect(dm) {
                 id: `TeleportToSpawn_runeocwithinline`,
                 eoc_type: 'ACTIVATION',
                 effect: [{ if: 'u_is_character', then: [{ run_eocs: [randTeleport.id] }] }],
-            }, alpha_loc: { global_val: exports.SpawnLocID } },
-        { u_teleport: { global_val: exports.SpawnLocID }, force: true },
+            }, alpha_loc: { global_val: Export_1.SPAWN_LOC_ID } },
+        { u_teleport: { global_val: Export_1.SPAWN_LOC_ID }, force: true },
     ]);
     out.push(teleportToSpawn);
     /**alpha是有效的npc */
@@ -76,7 +75,7 @@ async function buildNpcProtect(dm) {
     out.push(pdeath);
     //出生点设置
     const spawnLocSet = UNDefine_1.UNDef.genActEoc('SpawnLocSet', [
-        { u_location_variable: { global_val: exports.SpawnLocID } },
+        { u_location_variable: { global_val: Export_1.SPAWN_LOC_ID } },
     ]);
     dm.addInvokeID('GameStart', 0, spawnLocSet.id);
     out.push(spawnLocSet);
@@ -94,7 +93,7 @@ async function buildNpcProtect(dm) {
                 { u_set_talker: { var_val: "charidPtr" } },
             ],
         }
-    ], { u_has_trait: BaseData_1.UNIQUE_NPC_MUTID });
+    ], { u_has_trait: Export_1.UNIQUE_NPC_MUTID });
     dm.addInvokeID('Init', 0, InitNpc.id);
     out.push(InitNpc);
     //召集npc法术

@@ -2,8 +2,9 @@ import { DataManager } from "cdda-event";
 import { Eoc, Generic, Mutation, NpcClass, NpcInstance } from "cdda-schema";
 import { UNDef } from "./UNDefine";
 import { JObject } from "@zwa73/utils";
+import { UNIQUE_NPC_MUTID } from "./Export";
 
-export const UNIQUE_NPC_MUTID = "UniqueNPC";
+
 const UniqueNpcMut: Mutation = {
     id: UNIQUE_NPC_MUTID,
     name: "独特的NPC",

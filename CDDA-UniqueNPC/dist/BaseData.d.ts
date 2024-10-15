@@ -1,5 +1,4 @@
 import { DataManager } from "cdda-event";
-export declare const UNIQUE_NPC_MUTID = "UniqueNPC";
 export declare const DESTORY_U_EOCID = "DestoryU";
 /**用于必定成功的控制法术的flags */
 export declare const CON_SPELL_FLAG: readonly ["SILENT", "NO_HANDS", "NO_LEGS", "NO_FAIL", "NO_EXPLOSION_SFX"];

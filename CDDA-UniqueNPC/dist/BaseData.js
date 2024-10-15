@@ -1,11 +1,11 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.FULL_RECIVERY_EOCID = exports.CON_SPELL_FLAG = exports.DESTORY_U_EOCID = exports.UNIQUE_NPC_MUTID = void 0;
+exports.FULL_RECIVERY_EOCID = exports.CON_SPELL_FLAG = exports.DESTORY_U_EOCID = void 0;
 exports.buildBaseData = buildBaseData;
 const UNDefine_1 = require("./UNDefine");
-exports.UNIQUE_NPC_MUTID = "UniqueNPC";
+const Export_1 = require("./Export");
 const UniqueNpcMut = {
-    id: exports.UNIQUE_NPC_MUTID,
+    id: Export_1.UNIQUE_NPC_MUTID,
     name: "独特的NPC",
     purifiable: false,
     valid: false,

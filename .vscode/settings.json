@@ -15,7 +15,7 @@
             "fileMatch": [
                 "CDDA-SmartNPC/data/CastAI/**/*.json"
             ],
-            "url": "./CDDA-SmartNPC/schema/CastAIDataJson.schema.json"
+            "url": "./CDDA-SmartNPC/schema/CastAIDataJsonTable.schema.json"
         },
         {
             "fileMatch": ["CDDA-CustomMedia/data/Media/*/image/*.json"],

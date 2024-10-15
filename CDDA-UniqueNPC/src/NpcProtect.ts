@@ -1,16 +1,15 @@
 import { DataManager } from "cdda-event";
 import { BoolObj, Eoc, EocEffect, EocID, Spell } from "cdda-schema";
 import { UNDef } from "./UNDefine";
-import { FULL_RECIVERY_EOCID, DESTORY_U_EOCID, UNIQUE_NPC_MUTID, CON_SPELL_FLAG } from "./BaseData";
+import { FULL_RECIVERY_EOCID, DESTORY_U_EOCID, CON_SPELL_FLAG } from "./BaseData";
 import {JObject} from '@zwa73/utils';
+import { SPAWN_LOC_ID, UNIQUE_NPC_MUTID } from "./Export";
 
 
 
 
 
 
-/**出生点ID */
-export const SpawnLocID = "UniqueNpc_SpawnLoc";
 
 /**全局UniqueNPC的数量 */
 const UniqueNpcCountVarID = "UniqueNpcCount";
@@ -73,8 +72,8 @@ export async function buildNpcProtect(dm:DataManager){
             id:`TeleportToSpawn_runeocwithinline`,
             eoc_type:'ACTIVATION',
             effect:[ {if:'u_is_character',then:[{run_eocs:[randTeleport.id]}]} ],
-        }, alpha_loc:{global_val:SpawnLocID} },
-        {u_teleport:{global_val:SpawnLocID},force:true},
+        }, alpha_loc:{global_val:SPAWN_LOC_ID} },
+        {u_teleport:{global_val:SPAWN_LOC_ID},force:true},
     ]);
     out.push(teleportToSpawn);
 
@@ -93,7 +92,7 @@ export async function buildNpcProtect(dm:DataManager){
 
     //出生点设置
     const spawnLocSet:Eoc=UNDef.genActEoc('SpawnLocSet',[
-        {u_location_variable:{global_val:SpawnLocID}},
+        {u_location_variable:{global_val:SPAWN_LOC_ID}},
     ]);
     dm.addInvokeID('GameStart',0,spawnLocSet.id);
     out.push(spawnLocSet);
