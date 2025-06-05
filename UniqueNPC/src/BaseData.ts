@@ -1,5 +1,5 @@
-import { DataManager } from "cdda-event";
-import { Eoc, Generic, Mutation, NpcClass, NpcInstance } from "cdda-schema";
+import { DataManager } from "@sosarciel-cdda/cdda-event";
+import { Eoc, Generic, Mutation, NpcClass, NpcInstance } from "@sosarciel-cdda/@sosarciel-cdda/cdda-schema";
 import { UNDef } from "./UNDefine";
 import { JObject } from "@zwa73/utils";
 import { UNIQUE_NPC_MUTID } from "./Export";
