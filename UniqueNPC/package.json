@@ -1,5 +1,5 @@
 {
-  "name": "cdda-uniquenpc",
+  "name": "@sosarciel-cdda/cdda-uniquenpc",
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
@@ -14,8 +14,8 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "@zwa73/utils": "^1.0.163",
-    "cdda-event": "file:../CDDA-Event",
-    "cdda-schema": "file:../CDDA-Schema"
+    "@sosarciel-cdda/cdda-event": "^1.0.0",
+    "@sosarciel-cdda/cdda-schema": "^1.0.0",
+    "@zwa73/utils": "^1.0.163"
   }
 }
