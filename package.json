@@ -6,6 +6,6 @@
         "./Enchantment",
         "./SmartNPC",
         "./CustomNPC",
-        "./CDDA-UniqueNPC"
+        "./UniqueNPC"
     ]
 }
