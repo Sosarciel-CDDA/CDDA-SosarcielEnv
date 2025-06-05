@@ -1,11 +1,11 @@
 {
     "workspaces": [
-        "./CDDA-Schema",
-        "./CDDA-Event",
-        "./CDDA-CustomMedia",
-        "./CDDA-Enchantment",
-        "./CDDA-SmartNPC",
-        "./CDDA-CustomNPC",
+        "./Schema",
+        "./Event",
+        "./CustomMedia",
+        "./Enchantment",
+        "./SmartNPC",
+        "./CustomNPC",
         "./CDDA-UniqueNPC"
     ]
 }

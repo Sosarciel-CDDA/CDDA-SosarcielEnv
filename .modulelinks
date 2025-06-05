@@ -1,21 +1,21 @@
 [submodule "CDDA-Schema"]
-	path = CDDA-Schema
+	path = Schema
 	url = https://github.com/Sosarciel-CDDA/CDDA-Schema.git
 [submodule "CDDA-CustomNPC"]
-	path = CDDA-CustomNPC
+	path = CustomNPC
 	url = https://github.com/Sosarciel-CDDA/CDDA-CustomNPC.git
 [submodule "CDDA-Event"]
-	path = CDDA-Event
+	path = Event
 	url = https://github.com/Sosarciel-CDDA/CDDA-Event.git
 [submodule "CDDA-Enchantment"]
-	path = CDDA-Enchantment
+	path = Enchantment
 	url = https://github.com/Sosarciel-CDDA/CDDA-Enchantment.git
 [submodule "CDDA-SmartNPC"]
-	path = CDDA-SmartNPC
+	path = SmartNPC
 	url = https://github.com/Sosarciel-CDDA/CDDA-SmartNPC.git
 [submodule "CDDA-CustomMedia"]
-	path = CDDA-CustomMedia
+	path = CustomMedia
 	url = https://github.com/Sosarciel-CDDA/CDDA-CustomMedia.git
 [submodule "CDDA-WorldEditor"]
-	path = CDDA-WorldEditor
+	path = WorldEditor
 	url = https://github.com/Sosarciel-CDDA/CDDA-WorldEditor.git
