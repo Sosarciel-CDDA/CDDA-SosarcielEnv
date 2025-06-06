@@ -6,6 +6,8 @@
         "./Enchantment",
         "./SmartNPC",
         "./CustomNPC",
-        "./UniqueNPC"
+        "./UniqueNPC",
+		"./WorldEditor",
+		"./WorldEditor/client"
     ]
 }

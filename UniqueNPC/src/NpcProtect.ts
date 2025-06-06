@@ -1,5 +1,5 @@
-import { DataManager } from "@sosarciel-cdda/cdda-event";
-import { BoolObj, Eoc, EocEffect, EocID, Spell } from "@sosarciel-cdda/cdda-schema";
+import { DataManager } from "@sosarciel-cdda/event";
+import { BoolObj, Eoc, EocEffect, EocID, Spell } from "@sosarciel-cdda/schema";
 import { UNDef } from "./UNDefine";
 import { FULL_RECIVERY_EOCID, DESTORY_U_EOCID, CON_SPELL_FLAG } from "./BaseData";
 import {JObject} from '@zwa73/utils';

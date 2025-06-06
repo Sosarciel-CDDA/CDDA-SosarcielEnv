@@ -1,29 +1,29 @@
 {
     "json.schemas": [
         {
-            "fileMatch": ["CDDA-CustomNPC/data/Chars/*/config.json"],
-            "url": "./CDDA-CustomNPC/schema/CharConfig.schema.json"
+            "fileMatch": ["CustomNPC/data/Chars/*/config.json"],
+            "url": "./CustomNPC/schema/CharConfig.schema.json"
         },
         {
             "fileMatch": [
-                "CDDA-CustomNPC/data/Chars/*/StaticData/**/*.json",
-                "CDDA-CustomNPC/data/StaticData/**/*.json"
+                "CustomNPC/data/Chars/*/StaticData/**/*.json",
+                "CustomNPC/data/StaticData/**/*.json"
             ],
-            "url": "./CDDA-Schema/schema/AnyCddaJsonList.schema.json"
+            "url": "./Schema/schema/AnyCddaJsonList.schema.json"
         },
         {
             "fileMatch": [
-                "CDDA-SmartNPC/data/CastAI/**/*.json"
+                "SmartNPC/data/CastAI/**/*.json"
             ],
-            "url": "./CDDA-SmartNPC/schema/CastAIDataJsonTable.schema.json"
+            "url": "./SmartNPC/schema/CastAIDataJsonTable.schema.json"
         },
         {
-            "fileMatch": ["CDDA-CustomMedia/data/Media/*/image/*.json"],
-            "url": "./CDDA-CustomMedia/schema/ImageInfo.schema.json"
+            "fileMatch": ["CustomMedia/data/Media/*/image/*.json"],
+            "url": "./CustomMedia/schema/ImageInfo.schema.json"
         },
         {
-            "fileMatch": ["CDDA-CustomMedia/data/Media/*/anime/info.json"],
-            "url": "./CDDA-CustomMedia/schema/AnimeInfo.schema.json"
+            "fileMatch": ["CustomMedia/data/Media/*/anime/info.json"],
+            "url": "./CustomMedia/schema/AnimeInfo.schema.json"
         },
     ],
     "js/ts.implicitProjectConfig.target": "ES2022",

@@ -1,6 +1,6 @@
 import path from 'pathe';
 import { UtilFT } from '@zwa73/utils';
-import { ModDefine } from '@sosarciel-cdda/cdda-schema';
+import { ModDefine } from '@sosarciel-cdda/schema';
 
 
 
